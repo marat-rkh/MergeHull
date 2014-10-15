@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "utils.h"
-#include "split_poly.h"
 #include "merge.h"
 
 using std::vector;
