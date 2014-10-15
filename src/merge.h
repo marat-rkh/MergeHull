@@ -2,11 +2,12 @@
 #define MERGE_H
 
 #include <vector>
+#include <cstdlib>
 
 #include "point.h"
 
 using std::vector;
 
-vector<Point> getSorted(vector<Point> poly1, vector<Point> poly2);
+vector<Point> merge(vector<Point> const& poly1, vector<Point> const& poly2);
 
 #endif
