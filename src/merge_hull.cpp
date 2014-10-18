@@ -61,14 +61,6 @@ vector<size_t> positions_to_remove(vector<point_type> const& pts_set) {
     if(bad_pts_pos.empty()) {
         return bad_pts_pos;
     }
-//    else {
-//        std::cout << "Bad pts:\n";
-//        for(size_t i = 0; i != bad_pts_pos.size(); ++i) {
-//            if(bad_pts_pos[i] != 0) {
-//                std::cout << '(' << pts_set[bad_pts_pos[i]].x <<", " << pts_set[bad_pts_pos[i]].y << ")\n";
-//            }
-//        }
-//    }
     vector<size_t> pos_to_rm;
     auto fdist = [&](point_type const& p) {
         return std::pow(p.x - pts_set[0].x, 2) + std::pow(p.y - pts_set[0].y, 2);
@@ -110,18 +102,18 @@ vector<size_t> positions_to_remove(vector<point_type> const& pts_set) {
  */
 vector<point_type> remove_beams(vector<point_type> const& pts_set) {
     vector<size_t> pos_to_rm = positions_to_remove(pts_set);
-//    std::cout << "Pts to rm:\n";
-//    for(size_t i = 0; i != pos_to_rm.size(); ++i) {
-//        std::cout << '(' << pts_set[pos_to_rm[i]].x <<", " << pts_set[pos_to_rm[i]].y << ")\n";
-//    }
     if(pos_to_rm.empty()) {
         return pts_set;
     }
     vector<point_type> beams_free;
     size_t rm_pos = 0;
+    bool all_rms_done = false;
     for(size_t i = 0; i != pts_set.size(); ++i) {
-        if(i == pos_to_rm[rm_pos]) {
+        if(!all_rms_done && i == pos_to_rm[rm_pos]) {
             ++rm_pos;
+            if(rm_pos == pos_to_rm.size()) {
+                all_rms_done = true;
+            }
             continue;
         }
         beams_free.push_back(pts_set[i]);
