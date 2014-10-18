@@ -1,17 +1,29 @@
 #include "merge_hull.h"
 #include "utils.h"
 #include "merge.h"
-#include "point.h"
 
 #include <cmath>
+#include <iostream>
+#include <algorithm>
 
-vector<Point> grahamScan(vector<Point> const& ptsSet) {
-    vector<Point> res = {ptsSet[0], ptsSet[1]};
+using geom::structures::point_type;
+
+/*
+ * Rotates triangle counterclockwise
+ */
+void rotate_triangle_ccw(vector<point_type> & conv_hull) {
+    point_type buf(conv_hull[1]);
+    conv_hull[1] = conv_hull[2];
+    conv_hull[2] = buf;
+}
+
+vector<point_type> graham_scan(vector<point_type> const& ptsSet) {
+    vector<point_type> res = {ptsSet[0], ptsSet[1]};
     for(size_t i = 2; i != ptsSet.size(); ++i) {
-        if(getRotation(res[res.size() - 2], res.back(), ptsSet[i]) == CW) {
+        if(get_rotation(res[res.size() - 2], res.back(), ptsSet[i]) == CW) {
             res.pop_back();
             while(res.size() != 1) {
-                if(getRotation(res[res.size() - 2], res.back(), ptsSet[i]) != CW) {
+                if(get_rotation(res[res.size() - 2], res.back(), ptsSet[i]) != CW) {
                     break;
                 }
                 res.pop_back();
@@ -22,35 +34,93 @@ vector<Point> grahamScan(vector<Point> const& ptsSet) {
     return res;
 }
 
-vector<Point> removeBeams(vector<Point> const& pts_set) {
-    vector<size_t> bad_pts_ind;
+/*
+ * Returns vector of positions in pts_set, sequences of positions are separated by 0.
+ * This sequences consist of at least 2 positions. Points in pts_set in this sequential
+ * positions form a line with first point of pts_set.
+ */
+vector<size_t> bad_pts_positions(vector<point_type> const& pts_set) {
+    vector<size_t> bad_pts_pos;
     for(size_t i = 1; i != pts_set.size() - 1; ++i) {
-        if(getRotation(pts_set[0], pts_set[i], pts_set[i + 1]) == COLLIN) {
-            bad_pts_ind.push_back(i);
-            bad_pts_ind.push_back(i + 1);
-        } else if(!bad_pts_ind.empty() && bad_pts_ind.back() != 0) {
-            bad_pts_ind.push_back(0);
+        if(get_rotation(pts_set[0], pts_set[i], pts_set[i + 1]) == COLLIN) {
+            bad_pts_pos.push_back(i);
+            bad_pts_pos.push_back(i + 1);
+        } else if(!bad_pts_pos.empty() && bad_pts_pos.back() != 0) {
+            bad_pts_pos.push_back(0);
         }
     }
-    vector<size_t> rm_indexes;
+    bad_pts_pos.erase(std::unique(bad_pts_pos.begin(), bad_pts_pos.end()), bad_pts_pos.end());
+    return bad_pts_pos;
+}
+
+/*
+ * Finds positions in pts_set which should be removed to avoid beams problem
+ */
+vector<size_t> positions_to_remove(vector<point_type> const& pts_set) {
+    vector<size_t> const& bad_pts_pos = bad_pts_positions(pts_set);
+    if(bad_pts_pos.empty()) {
+        return bad_pts_pos;
+    }
+//    else {
+//        std::cout << "Bad pts:\n";
+//        for(size_t i = 0; i != bad_pts_pos.size(); ++i) {
+//            if(bad_pts_pos[i] != 0) {
+//                std::cout << '(' << pts_set[bad_pts_pos[i]].x <<", " << pts_set[bad_pts_pos[i]].y << ")\n";
+//            }
+//        }
+//    }
+    vector<size_t> pos_to_rm;
+    auto fdist = [&](point_type const& p) {
+        return std::pow(p.x - pts_set[0].x, 2) + std::pow(p.y - pts_set[0].y, 2);
+    };
     size_t max_dist = 0;
-    auto dist = [&](Point const& p) { return std::pow(p.x - pts_set[0].x, 2) + std::pow(p.y - pts_set[0].y, 2); };
-    for(size_t i = 0; i != bad_pts_ind.size(); ++i) {
-        if(bad_pts_ind[i] != 0) {
-            size_t cur_dist = dist(pts_set[bad_pts_ind[i]]);
+    size_t max_dist_pos = 0;
+    for(size_t i = 0; i != bad_pts_pos.size(); ++i) {
+        if(bad_pts_pos[i] != 0) {
+            size_t cur_dist = fdist(pts_set[bad_pts_pos[i]]);
             if(cur_dist <= max_dist) {
-                rm_indexes.push_back(i);
+                pos_to_rm.push_back(bad_pts_pos[i]);
             } else {
                 max_dist = cur_dist;
+                if(max_dist_pos != 0) {
+                    pos_to_rm.push_back(max_dist_pos);
+                }
+                max_dist_pos = bad_pts_pos[i];
             }
         } else {
             max_dist = 0;
+            max_dist_pos = 0;
         }
     }
-    vector<Point> beams_free;
+    return pos_to_rm;
+}
+
+/*
+ * Removes beams from pts_set. Beam is a set of points collinear to first
+ * (in this implementation it is leftmost and highest point) point in pts_set.
+ * In some situations graham scan can not detect them and produce wrong convex hull.
+ * Example:
+ * (-150, 150)
+ * (-100, -100)
+ * (100, -100)
+ * (0, 0)
+ * (150, -150)
+ * These points are sorted by azimuth but 4 of them are collinear (lie in one beam)
+ * so it produces problem.
+ */
+vector<point_type> remove_beams(vector<point_type> const& pts_set) {
+    vector<size_t> pos_to_rm = positions_to_remove(pts_set);
+//    std::cout << "Pts to rm:\n";
+//    for(size_t i = 0; i != pos_to_rm.size(); ++i) {
+//        std::cout << '(' << pts_set[pos_to_rm[i]].x <<", " << pts_set[pos_to_rm[i]].y << ")\n";
+//    }
+    if(pos_to_rm.empty()) {
+        return pts_set;
+    }
+    vector<point_type> beams_free;
     size_t rm_pos = 0;
     for(size_t i = 0; i != pts_set.size(); ++i) {
-        if(i == rm_indexes[rm_pos]) {
+        if(i == pos_to_rm[rm_pos]) {
             ++rm_pos;
             continue;
         }
@@ -59,30 +129,24 @@ vector<Point> removeBeams(vector<Point> const& pts_set) {
     return beams_free;
 }
 
-// todo: check input contract and handle special cases !!!
-/*
- * [beg, end)
- */
-vector<Point> mergeHull(vector<Point> const& pts_set, size_t beg, size_t end) {
+vector<point_type> merge_hull(vector<point_type> const& pts_set, size_t beg, size_t end) {
     if(end - beg < 4) {
-        vector<Point> conv_hull;
+        vector<point_type> conv_hull;
         for(size_t i = beg; i != end; ++i) {
             conv_hull.push_back(pts_set[i]);
         }
-        if(conv_hull.size() == 3 && getRotation(conv_hull[0], conv_hull[1], conv_hull[2]) == CW) {
-            Point buf(conv_hull[1]);
-            conv_hull[1] = conv_hull[2];
-            conv_hull[2] = buf;
+        if(conv_hull.size() == 3 && get_rotation(conv_hull[0], conv_hull[1], conv_hull[2]) == CW) {
+            rotate_triangle_ccw(conv_hull);
         }
         return conv_hull;
     }
     size_t m = (end - beg) / 2;
-    vector<Point> fst_ch = mergeHull(pts_set, beg, m);
-    vector<Point> snd_ch = mergeHull(pts_set, m, end);
-    vector<Point> sorted = merge(fst_ch, snd_ch);
-    vector<Point> ch = grahamScan(sorted);
-    if(ch.size() > 4) {
-        ch = grahamScan(removeBeams(ch));
+    vector<point_type> fst = merge_hull(pts_set, beg, beg + m);
+    vector<point_type> snd = merge_hull(pts_set, beg + m, end);
+    vector<point_type> sorted = merge(fst, snd);
+    vector<point_type> conv_hull = graham_scan(sorted);
+    if(conv_hull.size() > 4) {
+        conv_hull = graham_scan(remove_beams(conv_hull));
     }
-    return ch;
+    return conv_hull;
 }

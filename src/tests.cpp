@@ -7,6 +7,7 @@
 
 using std::vector;
 using std::pair;
+using geom::structures::point_type;
 
 Tests::Tests() {
     poly3_ = {{1,0}, {3,1}, {2,2}};
@@ -14,54 +15,54 @@ Tests::Tests() {
 }
 
 void Tests::testGetRotation() {
-    assert(getRotation({0,0}, {0, -2}, {2, 0}) == C_CW);
-    assert(getRotation({0,0}, {2, 0}, {0, -2}) == CW);
-    assert(getRotation({0,0}, {0, -2}, {0, 2}) == COLLIN);
+    assert(get_rotation({0,0}, {0, -2}, {2, 0}) == C_CW);
+    assert(get_rotation({0,0}, {2, 0}, {0, -2}) == CW);
+    assert(get_rotation({0,0}, {0, -2}, {0, 2}) == COLLIN);
 }
 
 void Tests::testTangencyPointsTriangle() {
-    pair<size_t, size_t> tps1 = tangencyPoints({0,0}, poly3_);
+    pair<size_t, size_t> tps1 = tangency_pts({0,0}, poly3_);
     assert(tps1.first == 2);
     assert(tps1.second == 0);
 }
 
 void Tests::testTangencyPointsTriangleCol() {
-    pair<size_t, size_t> tps1 = tangencyPoints({-1,-1}, poly3_);
+    pair<size_t, size_t> tps1 = tangency_pts({-1,-1}, poly3_);
     assert(tps1.first == 1);
     assert(tps1.second == 2);
 }
 
 void Tests::testTangencyPoints5() {
-    pair<size_t, size_t> tps1 = tangencyPoints({-2,-1}, poly5_);
+    pair<size_t, size_t> tps1 = tangency_pts({-2,-1}, poly5_);
     assert(tps1.first == 4);
     assert(tps1.second == 0);
 
-    tps1 = tangencyPoints({2,0}, poly5_);
+    tps1 = tangency_pts({2,0}, poly5_);
     assert(tps1.first == 1);
     assert(tps1.second == 0);
 
-    tps1 = tangencyPoints({2,5}, poly5_);
+    tps1 = tangency_pts({2,5}, poly5_);
     assert(tps1.first == 2);
     assert(tps1.second == 0);
 
-    tps1 = tangencyPoints({-2,7}, poly5_);
+    tps1 = tangency_pts({-2,7}, poly5_);
     assert(tps1.first == 1);
     assert(tps1.second == 3);
 }
 
 void Tests::testGetIncreasingChain() {
-    vector<Point> ch3 = getIncreasingChain({0,0}, poly3_);
+    vector<point_type> ch3 = get_incr_chain({0,0}, poly3_);
     assert(ch3.size() == 3);
     assert(ch3[0] == poly3_[0]);
     assert(ch3[1] == poly3_[1]);
     assert(ch3[2] == poly3_[2]);
 
-    vector<Point> ch3col = getIncreasingChain({-1,-1}, poly3_);
+    vector<point_type> ch3col = get_incr_chain({-1,-1}, poly3_);
     assert(ch3col.size() == 2);
     assert(ch3col[0] == poly3_[1]);
     assert(ch3col[1] == poly3_[2]);
 
-    vector<Point> ch5 = getIncreasingChain({-2,-1}, poly5_);
+    vector<point_type> ch5 = get_incr_chain({-2,-1}, poly5_);
     assert(ch5.size() == 5);
     assert(ch5[0] == poly5_[0]);
     assert(ch5[1] == poly5_[1]);
@@ -69,7 +70,7 @@ void Tests::testGetIncreasingChain() {
     assert(ch5[3] == poly5_[3]);
     assert(ch5[4] == poly5_[4]);
 
-    ch5 = getIncreasingChain({2,0}, poly5_);
+    ch5 = get_incr_chain({2,0}, poly5_);
     assert(ch5.size() == 5);
     assert(ch5[0] == poly5_[1]);
     assert(ch5[1] == poly5_[2]);
@@ -77,14 +78,14 @@ void Tests::testGetIncreasingChain() {
     assert(ch5[3] == poly5_[4]);
     assert(ch5[4] == poly5_[0]);
 
-    ch5 = getIncreasingChain({2,5}, poly5_);
+    ch5 = get_incr_chain({2,5}, poly5_);
     assert(ch5.size() == 4);
     assert(ch5[0] == poly5_[2]);
     assert(ch5[1] == poly5_[3]);
     assert(ch5[2] == poly5_[4]);
     assert(ch5[3] == poly5_[0]);
 
-    ch5 = getIncreasingChain({-2,7}, poly5_);
+    ch5 = get_incr_chain({-2,7}, poly5_);
     assert(ch5.size() == 4);
     assert(ch5[0] == poly5_[3]);
     assert(ch5[1] == poly5_[4]);
@@ -93,7 +94,7 @@ void Tests::testGetIncreasingChain() {
 }
 
 void Tests::testMergeSimple() {
-    vector<Point> m1 = merge(poly5_, poly3_);
+    vector<point_type> m1 = merge(poly5_, poly3_);
     assert(m1.size() == poly3_.size() + poly5_.size());
     assert(m1[0] == poly5_[3]);
     assert(m1[1] == poly5_[4]);
@@ -106,7 +107,7 @@ void Tests::testMergeSimple() {
 }
 
 void Tests::testMergeSimpleReversed() {
-    vector<Point> m1 = merge(poly3_, poly5_);
+    vector<point_type> m1 = merge(poly3_, poly5_);
     assert(m1.size() == poly3_.size() + poly5_.size());
     assert(m1[0] == poly5_[3]);
     assert(m1[1] == poly5_[4]);
@@ -119,8 +120,8 @@ void Tests::testMergeSimpleReversed() {
 }
 
 void Tests::testMergeBelow() {
-    vector<Point> polyBelow = {{-3,-1}, {-1,0}, {-2,1}};
-    vector<Point> m1 = merge(polyBelow, poly5_);
+    vector<point_type> polyBelow = {{-3,-1}, {-1,0}, {-2,1}};
+    vector<point_type> m1 = merge(polyBelow, poly5_);
     assert(m1.size() == polyBelow.size() + poly5_.size() - 1);
     assert(m1[0] == poly5_[3]);
     assert(m1[1] == poly5_[4]);
@@ -132,8 +133,8 @@ void Tests::testMergeBelow() {
 }
 
 void Tests::testMergeLeftBelow() {
-    vector<Point> polyBl = {{-5,-2}, {-3,-1}, {-4,0}};
-    vector<Point> m1 = merge(poly5_, polyBl);
+    vector<point_type> polyBl = {{-5,-2}, {-3,-1}, {-4,0}};
+    vector<point_type> m1 = merge(poly5_, polyBl);
     assert(m1.size() == polyBl.size() + poly5_.size() - 1);
     assert(m1[0] == polyBl[0]);
     assert(m1[1] == poly5_[0]);
@@ -145,8 +146,8 @@ void Tests::testMergeLeftBelow() {
 }
 
 void Tests::testMergeOverlapped() {
-    vector<Point> polyO = {{-3,5}, {-3,2}, {3,2}, {3, 5}};
-    vector<Point> m1 = merge(poly5_, polyO);
+    vector<point_type> polyO = {{-3,5}, {-3,2}, {3,2}, {3, 5}};
+    vector<point_type> m1 = merge(poly5_, polyO);
     assert(m1.size() == polyO.size() + poly5_.size() - 1);
     assert(m1[0] == polyO[0]);
     assert(m1[1] == polyO[1]);
@@ -181,8 +182,8 @@ void Tests::testMergeOverlapped() {
 }
 
 void Tests::testMergeLineFst() {
-    vector<Point> line = {{0,0}, {1,1}};
-    vector<Point> m1 = merge(poly3_, line);
+    vector<point_type> line = {{0,0}, {1,1}};
+    vector<point_type> m1 = merge(poly3_, line);
     assert(m1.size() == line.size() + poly3_.size());
     assert(m1[0] == line[0]);
     assert(m1[1] == poly3_[0]);
@@ -222,8 +223,8 @@ void Tests::testMergeLineFst() {
 }
 
 void Tests::testMergeLineSnd() {
-    vector<Point> line = {{2,1}, {4,1}, {7,1}};
-    vector<Point> m1 = merge(poly3_, line);
+    vector<point_type> line = {{2,1}, {4,1}, {7,1}};
+    vector<point_type> m1 = merge(poly3_, line);
     assert(m1.size() == line.size() + poly3_.size());
     assert(m1[0] == poly3_[0]);
     assert(m1[1] == line[2]);
@@ -267,9 +268,9 @@ void Tests::testMergeLineSnd() {
 }
 
 void Tests::testMergeLines() {
-    vector<Point> line1 = {{0,0}, {2,0}};
-    vector<Point> line2 = {{3,0}, {7,0}};
-    vector<Point> m1 = merge(line1, line2);
+    vector<point_type> line1 = {{0,0}, {2,0}};
+    vector<point_type> line2 = {{3,0}, {7,0}};
+    vector<point_type> m1 = merge(line1, line2);
     assert(m1.size() == line1.size() + line2.size());
     assert(m1[0] == line1[0]);
     assert(m1[1] == line1[1]);

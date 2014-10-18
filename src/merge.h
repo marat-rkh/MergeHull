@@ -5,12 +5,13 @@
 #include <utility>
 #include <cstdlib>
 
-#include "point.h"
+#include "geom/primitives/point.h"
 
 using std::vector;
 using std::pair;
+using geom::structures::point_type;
 
-vector<Point> merge(vector<Point> const& poly1, vector<Point> const& poly2);
+vector<point_type> merge(vector<point_type> const& poly1, vector<point_type> const& poly2);
 
 /*
  * Returns tangency points of the polynom passed elatively to the point p
@@ -18,7 +19,7 @@ vector<Point> merge(vector<Point> const& poly1, vector<Point> const& poly2);
  * Poly must have at least 3 vertices, be convex and not be a line.
  * Point must be outer point of the poly
  */
-pair<size_t, size_t> tangencyPoints(Point const &p, vector<Point> const& poly);
+pair<size_t, size_t> tangency_pts(point_type const &p, vector<point_type> const& poly);
 
 /*
  * Returns chain that increases relatively to passed point p. Chain is considered
@@ -28,13 +29,13 @@ pair<size_t, size_t> tangencyPoints(Point const &p, vector<Point> const& poly);
  * Poly must have at least 3 vertices, be convex and not be a line.
  * Point must be outer point of the poly
  */
-vector<Point> getIncreasingChain(Point const& p, vector<Point> const& poly);
+vector<point_type> get_incr_chain(point_type const& p, vector<point_type> const& poly);
 
 /*
  * Rotates line so that it becomes counterclockwise rotated relatevily to passed point p.
  * If line is collinear to the point it will be returned unchanged
  */
-vector<Point> makeLineCcwRotated(Point const& p, vector<Point> const& line);
+vector<point_type> rotate_line_ccw(point_type const& p, vector<point_type> const& line);
 
 
 #endif

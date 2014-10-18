@@ -1,10 +1,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "point.h"
-
 #include <vector>
 #include <cstdlib>
+
+#include "geom/primitives/contour.h"
+
+using geom::structures::point_type;
+using geom::structures::contour_type;
 
 enum TrRot { CW, C_CW, COLLIN };
 
@@ -16,10 +19,14 @@ enum TrRot { CW, C_CW, COLLIN };
  * v
  * P
  */
-TrRot getRotation(Point const& s, Point const& p, Point const& q);
+TrRot get_rotation(point_type const& s, point_type const& p, point_type const& q);
 
-bool azimuthLeq(Point const& p0, Point const& p1, Point const& p2);
+bool azimuth_leq(point_type const& p0, point_type const& p1, point_type const& p2);
 
-bool isLine(std::vector<Point> const& poly);
+bool is_line(std::vector<point_type> const& poly);
+
+contour_type to_contour_type(std::vector<point_type> const& poly);
+
+void print_conv_hull(std::vector<point_type> conv_hull);
 
 #endif // UTILS_H

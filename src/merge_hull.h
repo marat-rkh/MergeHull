@@ -2,11 +2,17 @@
 #define MERGE_HULL_H
 
 #include <vector>
+#include <cstdlib>
 
-#include "point.h"
+#include "geom/primitives/point.h"
 
 using std::vector;
+using geom::structures::point_type;
 
-vector<Point> grahamScan(vector<Point> const& ptsSet);
+/*
+ * Convex hull construction algorithm based on divide and conquer principle.
+ * Note, that 'beg' is inclusive and 'end' is explusive: [beg, end)
+ */
+vector<point_type> merge_hull(vector<point_type> const& pts_set, size_t beg, size_t end);
 
 #endif // MERGE_HULL_H

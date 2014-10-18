@@ -1,3 +1,6 @@
-*.pro
-*.pro.user
-*.pri
+*.o
+*.gch
+*.swp
+Makefile
+merge-hull
+*pro.user

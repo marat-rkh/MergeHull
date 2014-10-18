@@ -7,10 +7,11 @@
 #include <iostream>
 #include <exception>
 
-#include "point.h"
+#include "geom/primitives/point.h"
 
 using std::vector;
 using std::pair;
+using geom::structures::point_type;
 
 class Tests {
 public:
@@ -53,8 +54,8 @@ private:
     void testMergeLineSnd();
     void testMergeLines();
 
-    vector<Point> poly3_;
-    vector<Point> poly5_;
+    vector<point_type> poly3_;
+    vector<point_type> poly5_;
 };
 
 #endif // TESTS_H
