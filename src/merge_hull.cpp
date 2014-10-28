@@ -88,7 +88,7 @@ vector<size_t> positions_to_remove(vector<point_type> const& pts_set) {
 }
 
 /*
- * Removes beams from pts_set. Beam is a set of points collinear to first
+ * Removes beams from pts_set. Beam is a set of points collinear to the first
  * (in this implementation it is leftmost and highest point) point in pts_set.
  * In some situations graham scan can not detect them and produce wrong convex hull.
  * Example:
@@ -98,7 +98,7 @@ vector<size_t> positions_to_remove(vector<point_type> const& pts_set) {
  * (0, 0)
  * (150, -150)
  * These points are sorted by azimuth but 4 of them are collinear (lie in one beam)
- * so it produces problem.
+ * so it produces the problem.
  */
 vector<point_type> remove_beams(vector<point_type> const& pts_set) {
     vector<size_t> pos_to_rm = positions_to_remove(pts_set);

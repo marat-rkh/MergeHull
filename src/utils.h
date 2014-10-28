@@ -29,4 +29,8 @@ contour_type to_contour_type(std::vector<point_type> const& poly);
 
 void print_conv_hull(std::vector<point_type> conv_hull);
 
+bool pt_leq (point_type const& p1, point_type const& p2);
+
+void remove_duplicates(std::vector<point_type> & pts_set);
+
 #endif // UTILS_H

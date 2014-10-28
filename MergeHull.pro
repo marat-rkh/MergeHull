@@ -30,14 +30,15 @@ SOURCES += src/tests.cpp \
     src/merge.cpp \
     src/main.cpp \
     src/utils.cpp \
-    src/merge_hull.cpp \
+    src/merge_hull.cpp
 
 HEADERS += src/tests.h \
     src/merge.h \
     src/utils.h \
     src/merge_hull.h \
     src/viewer.h \
-    src/stdafx.h
+    src/stdafx.h \
+    src/poly_iter.h
 
 LIBS += -Lvisualization -lvisualization
 

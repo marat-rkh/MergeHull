@@ -14,6 +14,11 @@ using geom::structures::point_type;
 vector<point_type> merge(vector<point_type> const& poly1, vector<point_type> const& poly2);
 
 /*
+ * Removes all the intermidiate points of the line
+ */
+vector<point_type> simplify_line(vector<point_type> const& line);
+
+/*
  * Returns tangency points of the polynom passed elatively to the point p
  * Contract:
  * Poly must have at least 3 vertices, be convex and not be a line.
@@ -36,6 +41,5 @@ vector<point_type> get_incr_chain(point_type const& p, vector<point_type> const&
  * If line is collinear to the point it will be returned unchanged
  */
 vector<point_type> rotate_line_ccw(point_type const& p, vector<point_type> const& line);
-
 
 #endif

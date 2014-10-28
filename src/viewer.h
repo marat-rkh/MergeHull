@@ -57,6 +57,7 @@ bool convex_hull_viewer::on_key(int key)
     case Qt::Key_Return: 
         if (pts_.size() >= 2)
         {
+            remove_duplicates(pts_);
             vector<point_type> conv_hull = merge_hull(pts_, 0, pts_.size());
             print_conv_hull(conv_hull);
             cnt_.reset(new contour_type(to_contour_type(conv_hull)));

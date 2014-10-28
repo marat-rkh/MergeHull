@@ -8,6 +8,12 @@ using std::vector;
 using std::pair;
 using geom::structures::point_type;
 
+vector<point_type> simplify_line(vector<point_type> const& line) {
+    auto min_it = std::min_element(line.begin(), line.end(), pt_leq);
+    auto max_it = std::max_element(line.begin(), line.end(), pt_leq);
+    return {*min_it, *max_it};
+}
+
 pair<size_t, size_t> tangency_pts(point_type const &p, vector<point_type> const& poly) {
     vector<size_t> res_buf;
     TrRot lastRot = get_rotation(p, poly[0], poly[1]);
@@ -24,7 +30,7 @@ pair<size_t, size_t> tangency_pts(point_type const &p, vector<point_type> const&
     return std::make_pair(res_buf[0], res_buf[1]);
 }
 
-bool chainIsIncreasing(point_type const& p, vector<point_type> const& chain) {
+bool chain_is_increasing(point_type const& p, vector<point_type> const& chain) {
     for(size_t i = 0; i != chain.size() - 1; ++i) {
         if(get_rotation(p, chain[i], chain[i + 1]) == C_CW) {
             return true;
@@ -44,7 +50,7 @@ vector<point_type> get_incr_chain(point_type const& p, vector<point_type> const&
         chain2.push_back(poly[i]);
     }
     chain2.push_back(poly[tps.first]);
-    return chainIsIncreasing(p, chain1) ? chain1 : chain2;
+    return chain_is_increasing(p, chain1) ? chain1 : chain2;
 }
 
 vector<point_type> rotate_line_ccw(point_type const& p, vector<point_type> const& line) {
@@ -83,13 +89,25 @@ vector<point_type> getSorted(size_t lmostPtInd, vector<point_type> const& lPoly,
 }
 
 vector<point_type> merge(vector<point_type> const& poly1, vector<point_type> const& poly2) {
-    auto fstXLeqYGreater = [](point_type const& a, point_type const& b){ return a.x < b.x || (a.x == b.x && a.y > b.y); };
-    vector<point_type>::const_iterator min1 = std::min_element(poly1.begin(), poly1.end(), fstXLeqYGreater);
-    vector<point_type>::const_iterator min2 = std::min_element(poly2.begin(), poly2.end(), fstXLeqYGreater);
-    if(fstXLeqYGreater(*min1, *min2)) {
-        vector<point_type> const& normPoly = is_line(poly2) ? rotate_line_ccw(*min1, poly2): get_incr_chain(*min1, poly2);
-        return getSorted(min1 - poly1.begin(), poly1, normPoly);
+    vector<point_type> poly1_norm(poly1);
+    vector<point_type> poly2_norm(poly2);
+    if(is_line(poly1)) {
+        poly1_norm = simplify_line(poly1);
     }
-    vector<point_type> const& normPoly = is_line(poly1) ? rotate_line_ccw(*min2, poly1) : get_incr_chain(*min2, poly1);
-    return getSorted(min2 - poly2.begin(), poly2, normPoly);
+    if(is_line(poly2)) {
+        poly2_norm = simplify_line(poly2);
+    }
+    auto x_leq_y_greater = [](point_type const& a, point_type const& b){
+        return a.x < b.x || (a.x == b.x && a.y > b.y);
+    };
+    auto min1 = std::min_element(poly1_norm.begin(), poly1_norm.end(), x_leq_y_greater);
+    auto min2 = std::min_element(poly2_norm.begin(), poly2_norm.end(), x_leq_y_greater);
+    if(x_leq_y_greater(*min1, *min2)) {
+        vector<point_type> const& normPoly =  is_line(poly2_norm) ? rotate_line_ccw(*min1, poly2_norm) :
+                                                               get_incr_chain(*min1, poly2_norm);
+        return getSorted(min1 - poly1_norm.begin(), poly1_norm, normPoly);
+    }
+    vector<point_type> const& normPoly = is_line(poly1_norm) ? rotate_line_ccw(*min2, poly1_norm) :
+                                                          get_incr_chain(*min2, poly1_norm);
+    return getSorted(min2 - poly2_norm.begin(), poly2_norm, normPoly);
 }

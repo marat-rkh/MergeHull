@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <iostream>
+#include <algorithm>
 
 using geom::structures::point_type;
 using geom::structures::contour_type;
@@ -67,8 +68,20 @@ contour_type to_contour_type(std::vector<point_type> const& poly) {
 }
 
 void print_conv_hull(std::vector<geom::structures::point_type> conv_hull) {
-    std::cout << "Convex hull:\n";
+    std::cout << "Convex hull:\n" << conv_hull.size() << "\n";
     for(size_t i = 0; i != conv_hull.size(); ++i) {
         std::cout << '(' << conv_hull[i].x <<", " << conv_hull[i].y << ")\n";
     }
+}
+
+bool pt_leq (point_type const& p1, point_type const& p2) {
+    if(p1.x < p2.x) return true;
+    else if(p1.x == p2.x && p1.y < p2.y) return true;
+    return false;
+}
+
+void remove_duplicates(std::vector<point_type> & pts_set) {
+    std::sort(pts_set.begin(), pts_set.end(), pt_leq);
+    auto eq_pred = [](point_type const& p1, point_type const& p2){ return p1.x == p2.x && p1.y == p2.y; };
+    pts_set.erase(std::unique(pts_set.begin(), pts_set.end(), eq_pred), pts_set.end());
 }
